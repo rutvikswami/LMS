@@ -26,7 +26,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-purple-500 to-indigo-500">
+          <div className="flex h-full items-center justify-center bg-linear-to-br from-purple-500 to-indigo-500">
             <span className="text-5xl font-bold text-white">
               {course.title.charAt(0)}
             </span>
