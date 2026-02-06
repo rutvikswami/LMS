@@ -21,20 +21,49 @@ class Course(models.Model):
         return self.title
 
 
-class Chapter(models.Model):
+class Section(models.Model):
+    """
+    A section within a course (like Udemy sections).
+    Example: "Section 1: Introduction to Python"
+    """
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
-        related_name="chapters"
+        related_name="sections"
     )
     title = models.CharField(max_length=255)
     order = models.PositiveIntegerField()
 
     class Meta:
         ordering = ["order"]
+        unique_together = ["course", "order"]
 
     def __str__(self):
         return f"{self.course.title} - {self.title}"
+
+
+class Chapter(models.Model):
+    """
+    A chapter/lecture within a section (like Udemy lectures).
+    Example: "1. Installing Python"
+    """
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.CASCADE,
+        related_name="chapters"
+    )
+    title = models.CharField(max_length=255)
+    content = models.TextField(blank=True, help_text="Chapter content/description")
+    video_url = models.URLField(blank=True, null=True, help_text="Video URL if applicable")
+    duration_minutes = models.PositiveIntegerField(default=0, help_text="Duration in minutes")
+    order = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ["order"]
+        unique_together = ["section", "order"]
+
+    def __str__(self):
+        return f"{self.section.title} - {self.title}"
 
 
 class Enrollment(models.Model):

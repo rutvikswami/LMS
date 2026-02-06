@@ -11,11 +11,26 @@ export interface Course {
 export interface Chapter {
   id: number;
   title: string;
+  content: string;
+  video_url: string | null;
+  duration_minutes: number;
   order: number;
 }
 
-export interface CourseDetail extends Course {
+export interface Section {
+  id: number;
+  title: string;
+  order: number;
   chapters: Chapter[];
+  chapter_count: number;
+  total_duration: number;
+}
+
+export interface CourseDetail extends Course {
+  sections: Section[];
+  total_sections: number;
+  total_chapters: number;
+  total_duration: number;
 }
 
 export interface Enrollment {

@@ -70,7 +70,7 @@ const CourseDetail: React.FC = () => {
         <div className="mx-auto max-w-7xl px-6 py-12 grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <p className="mb-2 text-sm font-medium text-purple-600">
-              {course.chapters.length} Chapters
+              {course.total_sections || 0} Sections • {course.total_chapters || 0} Lectures • {Math.floor((course.total_duration || 0) / 60)}h {(course.total_duration || 0) % 60}m
             </p>
             <h1 className="mb-4 text-4xl font-bold text-gray-900">
               {course.title}
@@ -133,28 +133,66 @@ const CourseDetail: React.FC = () => {
             </ul>
           </div>
 
-          {/* Chapters */}
+          {/* Course Content */}
           <div className="rounded-xl border bg-white p-6">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
-              Course Content
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Course Content</h2>
+              <div className="text-sm text-gray-600">
+                <span className="font-semibold">{course.total_sections || 0}</span> sections • 
+                <span className="font-semibold ml-1">{course.total_chapters || 0}</span> lectures • 
+                <span className="font-semibold ml-1">{Math.floor((course.total_duration || 0) / 60)}h {(course.total_duration || 0) % 60}m</span>
+              </div>
+            </div>
 
-            {course.chapters.length === 0 ? (
-              <p className="text-gray-600">No chapters available.</p>
+            {!course.sections || course.sections.length === 0 ? (
+              <p className="text-gray-600">No content available.</p>
             ) : (
-              <div className="space-y-2">
-                {course.chapters.map((chapter, index) => (
-                  <div
-                    key={chapter.id}
-                    className="flex items-center gap-4 rounded-lg border px-4 py-3 hover:bg-gray-50"
+              <div className="space-y-3">
+                {course.sections.map((section) => (
+                  <details
+                    key={section.id}
+                    className="group bg-gray-50 rounded-lg overflow-hidden border border-gray-200 hover:border-purple-300 transition-all"
                   >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-md bg-purple-100 text-sm font-bold text-purple-700">
-                      {index + 1}
-                    </span>
-                    <span className="font-medium text-gray-800">
-                      {chapter.title}
-                    </span>
-                  </div>
+                    <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-gray-600 group-open:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                        <div>
+                          <h3 className="text-base font-bold text-gray-900">{section.title}</h3>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {section.chapter_count} lectures • {section.total_duration} min
+                          </p>
+                        </div>
+                      </div>
+                    </summary>
+                    <div className="px-4 pb-4">
+                      <ul className="space-y-2 mt-2">
+                        {section.chapters.map((chapter) => (
+                          <li
+                            key={chapter.id}
+                            className="flex items-center justify-between p-3 bg-white rounded-lg hover:bg-purple-50 transition-colors border border-gray-100"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center justify-center w-7 h-7 bg-purple-100 rounded-lg">
+                                {chapter.video_url ? (
+                                  <svg className="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                )}
+                              </div>
+                              <span className="text-gray-800 font-medium text-sm">{chapter.title}</span>
+                            </div>
+                            <span className="text-sm text-gray-500 font-medium">{chapter.duration_minutes} min</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </details>
                 ))}
               </div>
             )}

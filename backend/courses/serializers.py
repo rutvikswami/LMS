@@ -2,6 +2,7 @@ from rest_framework import serializers
 from accounts.models import User
 from .models import (
     Course,
+    Section,
     Chapter,
     Enrollment,
     CourseProgress,
@@ -17,8 +18,34 @@ class ChapterSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "title",
+            "content",
+            "video_url",
+            "duration_minutes",
             "order",
         )
+
+
+class SectionSerializer(serializers.ModelSerializer):
+    chapters = ChapterSerializer(many=True, read_only=True)
+    chapter_count = serializers.SerializerMethodField()
+    total_duration = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Section
+        fields = (
+            "id",
+            "title",
+            "order",
+            "chapters",
+            "chapter_count",
+            "total_duration",
+        )
+
+    def get_chapter_count(self, obj):
+        return obj.chapters.count()
+
+    def get_total_duration(self, obj):
+        return sum(chapter.duration_minutes for chapter in obj.chapters.all())
 
 
 # -------------------------------------------------
@@ -50,7 +77,10 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     - Before enrollment
     """
 
-    chapters = ChapterSerializer(many=True, read_only=True)
+    sections = SectionSerializer(many=True, read_only=True)
+    total_sections = serializers.SerializerMethodField()
+    total_chapters = serializers.SerializerMethodField()
+    total_duration = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
@@ -59,9 +89,25 @@ class CourseDetailSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "thumbnail",
-            "chapters",
+            "sections",
+            "total_sections",
+            "total_chapters",
+            "total_duration",
             "created_at",
         )
+
+    def get_total_sections(self, obj):
+        return obj.sections.count()
+
+    def get_total_chapters(self, obj):
+        return sum(section.chapters.count() for section in obj.sections.all())
+
+    def get_total_duration(self, obj):
+        total = 0
+        for section in obj.sections.all():
+            for chapter in section.chapters.all():
+                total += chapter.duration_minutes
+        return total
 
 
 # -------------------------------------------------
@@ -134,7 +180,7 @@ class CourseContentSerializer(serializers.ModelSerializer):
     - Viewing course content after enrollment
     """
 
-    chapters = ChapterSerializer(many=True)
+    sections = SectionSerializer(many=True)
 
     class Meta:
         model = Course
@@ -142,7 +188,7 @@ class CourseContentSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "description",
-            "chapters",
+            "sections",
         )
 
 
